@@ -197,4 +197,4 @@ def private_chat_annual_report(name):
 if __name__ == "__main__":
     contacts, messages = load_info()
     personal_annual_report()
-    # group_chat_annual_report("群聊名称")
+    group_chat_annual_report("群聊名称")
