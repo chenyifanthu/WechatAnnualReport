@@ -19,6 +19,13 @@ def filter_group(df: pd.DataFrame, group_name: str):
     filtered = filtered.reset_index()
     return filtered, fullname
 
+def filter_friend(df: pd.DataFrame, friend_name: str):
+    res = df[df["NickName"].apply(lambda x: friend_name in x)]
+    fullname = res["NickName"].value_counts().index[0]
+    filtered = res[res["NickName"] == fullname]
+    filtered = filtered.reset_index()
+    return filtered, fullname
+
 
 def calculate_words(df: pd.DataFrame):
     n_mess = len(df)
@@ -188,13 +195,33 @@ def group_chat_annual_report(groupname):
     
     
 def private_chat_annual_report(name):
-    # TODO: 生成和某个人的聊天信息报告
-    # 去跨年旅游懒得写了，欢迎大佬提交PR👏
-    pass
+    global messages
+    friend, fullname = filter_friend(messages, name)
+    n_mess, n_char = calculate_words(friend)
+    latest = get_latest_time(friend)
+    cnt = plot_wordcloud(friend)
+    print(len(cnt[0][0]), cnt[0][0])
+    print(f"👏你和【{fullname}】2023年度报告\n")
+    print("📊这一年中，你们一共发出了{}条消息，{}个字".format(n_mess, n_char))
+    print("  其中最晚的一条消息是【{}】在【{}】发出的，内容是【{}】".format(
+        remark2name(latest["Sender"]), latest["StrTime"], latest["StrContent"]))
+    
+    print("\n🔥你们的年度热词Top5：")
+    emojis = ["1️⃣", "2️⃣", "3️⃣", "4️⃣", "5️⃣"]
+    for i in range(5):
+        print("{}【{}】共出现了{}次".format(emojis[i], cnt[i][0], cnt[i][1]))
+    
+    emojis = top_emoji(friend)
+    print("\n🤚你们的年度表情包Top5:")
+    for i in range(5):
+        print("{}".format(emojis[i][0]), end=" ")
+    
+    plot_nmess_per_minute(friend)    
+    plot_nmess_per_month(friend)
+    
     
     
     
 if __name__ == "__main__":
     contacts, messages = load_info()
     personal_annual_report()
-    group_chat_annual_report("群聊名称")
