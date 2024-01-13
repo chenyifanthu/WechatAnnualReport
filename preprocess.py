@@ -1,5 +1,6 @@
 import re
 import pandas as pd
+from emojis import unify_emoji
 
 MY_WECHAT_NAME = "my_wechat_name"    # 用来替代聊天记录文件中的【我】
 
@@ -47,6 +48,8 @@ def load_info(contacts_file: str = 'contacts.csv',
     messages["isGroup"] = messages["NickName"].apply(lambda x: isgroup[x])
     messages["Sender"] = messages["Sender"].apply(lambda x: remark2nickname.get(x, x))
     messages.reset_index(inplace=True)
+    
+    messages["StrContent"] = messages["StrContent"].apply(unify_emoji)
     
     return contacts, messages
 

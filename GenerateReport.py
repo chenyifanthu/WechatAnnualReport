@@ -9,6 +9,7 @@ from tqdm import tqdm
 from collections import Counter
 from wordcloud import WordCloud, STOPWORDS
 from preprocess import load_info, MY_WECHAT_NAME
+from emojis import EMOJIS, EMOJI_PATTERN
 
 
 
@@ -71,7 +72,10 @@ def plot_wordcloud(df, output_file: str = "wordcloud.png"):
     
     all_words = []
     for i, row in tqdm(df.iterrows(), total=len(df)):
-        words = jieba.lcut(row["StrContent"])
+        row_content = row["StrContent"]
+        for emoji in EMOJIS:
+            row_content = row_content.replace(emoji, " ")
+        words = jieba.lcut(row_content)
         for word in words:
             if len(word) > 1 and word not in STOPWORDS:
                 all_words.append(word)
@@ -109,7 +113,7 @@ def most_active_day(df):
 def top_emoji(df: pd.DataFrame):
     cnt = {}
     for i, row in df.iterrows():
-        res_all = re.findall("\[.*?\]", row["StrContent"], re.I|re.M)
+        res_all = EMOJI_PATTERN.findall(row["StrContent"])
         for res in res_all:
             if len(res) < 10:
                 cnt[res] = cnt.get(res, 0) + 1
