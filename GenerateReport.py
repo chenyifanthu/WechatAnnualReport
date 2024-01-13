@@ -144,16 +144,16 @@ def personal_annual_report():
         group_cnt.index[0], group_cnt.values[0]))
     print("👉我最喜欢和联系人【{}】聊天，向ta激情发出{}条信息，得到了{}条回复。\n".format(
         private_cnt.index[0], private_cnt.values[0], 
-        len(messages[(messages["NickName"] == private_cnt.index[0]) & (messages["Sender"] != '我')])))
+        len(messages[(messages["NickName"] == private_cnt.index[0]) & (messages["Sender"] != MY_WECHAT_NAME)])))
 
     print("\n🔥我的年度热词Top5：")
     emojis = ["1️⃣", "2️⃣", "3️⃣", "4️⃣", "5️⃣"]
-    for i in range(5):
+    for i in range(min(5, len(cnt))):
         print("{}【{}】共使用{}次".format(emojis[i], cnt[i][0], cnt[i][1]))
     
     emojis = top_emoji(me)
     print("\n🤚我的年度表情包Top5:")
-    for i in range(5):
+    for i in range(min(5, len(emojis))):
         print("{}".format(emojis[i][0]), end=" ")
     
     plot_nmess_per_minute(me)
@@ -182,12 +182,12 @@ def group_chat_annual_report(groupname):
     
     print("\n🔥本群年度热词Top5：")
     emojis = ["1️⃣", "2️⃣", "3️⃣", "4️⃣", "5️⃣"]
-    for i in range(5):
+    for i in range(min(5, len(cnt))):
         print("{}【{}】共出现了{}次".format(emojis[i], cnt[i][0], cnt[i][1]))
     
     emojis = top_emoji(group)
     print("\n🤚本群年度表情包Top5:")
-    for i in range(5):
+    for i in range(min(5, len(emojis))):
         print("{}".format(emojis[i][0]), end=" ")
     
     plot_nmess_per_minute(group)    
@@ -216,12 +216,12 @@ def private_chat_annual_report(name):
     
     print("\n🔥你们的年度热词Top5：")
     emojis = ["1️⃣", "2️⃣", "3️⃣", "4️⃣", "5️⃣"]
-    for i in range(5):
+    for i in range(min(5, len(cnt))):
         print("{}【{}】共出现了{}次".format(emojis[i], cnt[i][0], cnt[i][1]))
     
     emojis = top_emoji(friend)
     print("\n🤚你们的年度表情包Top5:")
-    for i in range(5):
+    for i in range(min(5, len(emojis))):
         print("{}".format(emojis[i][0]), end=" ")
     
     plot_nmess_per_minute(friend)    
