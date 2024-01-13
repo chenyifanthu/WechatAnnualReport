@@ -64,7 +64,7 @@ def plot_nmess_per_month(df: pd.DataFrame):
     plt.savefig("nmess_per_month.png")
 
 
-def plot_wordcloud(df):
+def plot_wordcloud(df, output_file: str = "wordcloud.png"):
     global STOPWORDS
     my_stopwords = open("stopwords.txt", "r", encoding="utf-8").read().split("\n")
     STOPWORDS |= set(my_stopwords + ["\r\n"])
@@ -86,7 +86,7 @@ def plot_wordcloud(df):
     plt.figure(figsize=(12, 12))
     plt.imshow(wc, interpolation="bilinear")
     plt.axis("off")
-    plt.savefig("wordcloud.png")
+    plt.savefig(output_file)
     return cnt
     
     
@@ -204,11 +204,18 @@ def name2remark(name: str):
 
 def private_chat_annual_report(name):
     global messages
+    global STOPWORDS
     friend, fullname = filter_friend(messages, name)
+    STOPWORDS.add(name2remark(fullname))
     n_mess, n_char = calculate_words(friend)
     latest = get_latest_time(friend)
     cnt = plot_wordcloud(friend)
-    print(len(cnt[0][0]), cnt[0][0])
+    me = friend[friend['Sender'] == MY_WECHAT_NAME]
+    me = me.reset_index(drop=True)
+    cnt_me = plot_wordcloud(me, "wordcloud_me.png")
+    ta = friend[friend['Sender'] == fullname]
+    ta = ta.reset_index(drop=True)
+    cnt_ta = plot_wordcloud(ta, "wordcloud_ta.png")
     print(f"👏你和【{fullname}】2023年度报告\n")
     print("📊这一年中，你们一共发出了{}条消息，{}个字".format(n_mess, n_char))
     print("  其中最晚的一条消息是【{}】在【{}】发出的，内容是【{}】".format(
@@ -223,6 +230,27 @@ def private_chat_annual_report(name):
     print("\n🤚你们的年度表情包Top5:")
     for i in range(min(5, len(emojis))):
         print("{}".format(emojis[i][0]), end=" ")
+        
+    print("\n\n🔥我的年度热词Top5：")
+    emojis = ["1️⃣", "2️⃣", "3️⃣", "4️⃣", "5️⃣"]
+    for i in range(min(5, len(cnt_me))):
+        print("{}【{}】共使用{}次".format(emojis[i], cnt_me[i][0], cnt_me[i][1]))
+    
+    emojis = top_emoji(me)
+    print("\n🤚我的年度表情包Top5:")
+    for i in range(min(5, len(emojis))):
+        print("{}".format(emojis[i][0]), end=" ")
+    
+    print("\n\n🔥TA的年度热词Top5：")
+    emojis = ["1️⃣", "2️⃣", "3️⃣", "4️⃣", "5️⃣"]
+    for i in range(min(5, len(cnt_ta))):
+        print("{}【{}】共使用{}次".format(emojis[i], cnt_ta[i][0], cnt_ta[i][1]))
+    
+    emojis = top_emoji(ta)
+    print("\n🤚TA的年度表情包Top5:")
+    for i in range(min(5, len(emojis))):
+        print("{}".format(emojis[i][0]), end=" ")
+    
     
     plot_nmess_per_minute(friend)    
     plot_nmess_per_month(friend)
