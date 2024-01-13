@@ -42,6 +42,7 @@ def load_info(contacts_file: str = 'contacts.csv',
     messages = messages[(messages["StrTime"] >= start_date) & \
                         (messages["StrTime"] < end_date) & \
                         (messages["StrContent"].apply(parse_message))]
+    messages = messages[messages['NickName'] != '微信团队']
     
     messages["isGroup"] = messages["NickName"].apply(lambda x: isgroup[x])
     messages["Sender"] = messages["Sender"].apply(lambda x: remark2nickname.get(x, x))
