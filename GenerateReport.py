@@ -194,6 +194,14 @@ def group_chat_annual_report(groupname):
     plot_nmess_per_month(group)
     
     
+def name2remark(name: str):
+    global contacts
+    if name == MY_WECHAT_NAME:
+        return "我"
+    res = contacts[contacts["NickName"] == name]["Remark"].values
+    return res[0] if len(res) > 0 else name
+
+
 def private_chat_annual_report(name):
     global messages
     friend, fullname = filter_friend(messages, name)
@@ -204,7 +212,7 @@ def private_chat_annual_report(name):
     print(f"👏你和【{fullname}】2023年度报告\n")
     print("📊这一年中，你们一共发出了{}条消息，{}个字".format(n_mess, n_char))
     print("  其中最晚的一条消息是【{}】在【{}】发出的，内容是【{}】".format(
-        remark2name(latest["Sender"]), latest["StrTime"], latest["StrContent"]))
+        name2remark(latest["Sender"]), latest["StrTime"], latest["StrContent"]))
     
     print("\n🔥你们的年度热词Top5：")
     emojis = ["1️⃣", "2️⃣", "3️⃣", "4️⃣", "5️⃣"]
