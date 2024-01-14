@@ -4,7 +4,6 @@ import pandas as pd
 from .emojis import EMOJI_PATTERN
 
 
-
 def calculate_words(df: pd.DataFrame):
     n_mess = len(df)
     n_char = sum(df['StrContent'].apply(len))

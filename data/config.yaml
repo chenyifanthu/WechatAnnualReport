@@ -13,11 +13,11 @@ stopwords_path: ./data/stopwords.txt
 font_path: ./data/simhei.ttf
 
 # 输出图片的保存位置
-results_save_dir: ./output
+output_dir: ./output
 
 # 个人微信名称，用于替代数据文件中的“我”
 my_wechat_name: ABC
 
 # 一天当中最晚的时刻，该时刻之后的消息将被归入第二天
 # float类型，例如：5.0表示凌晨5点，4.5表示凌晨4点半
-latest_time: 5.0
+latest_hour: 5.0

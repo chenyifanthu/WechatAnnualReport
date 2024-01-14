@@ -1,24 +1,26 @@
-import re
+import os
 import time
 import tools 
-
-import pandas as pd
-import matplotlib.pyplot as plt
-
-from tqdm import tqdm
-from collections import Counter
-from wordcloud import WordCloud, STOPWORDS
+import argparse
+from tools import load_config
 
 
+def parse_args():
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--config", type=str, default="./data/config.yaml")
+    args = parser.parse_args()
+    args = load_config(args)
+    return args
 
 
 if __name__ == "__main__":
-    contacts, messages = tools.load_data()
-    me = messages[messages['Sender'] == MY_WECHAT_NAME]
+    args = parse_args()
+    contacts, messages = tools.load_data(args)
+    me = messages[messages['Sender'] == args.my_wechat_name]
     me = me.reset_index()
     n_mess, n_char = tools.calculate_words(me)
-    latest = tools.get_latest_time(me)
-    cnt = tools.plot_wordcloud(me)
+    latest = tools.get_latest_time(me, args.latest_hour)
+    cnt = tools.plot_wordcloud(me, os.path.join(args.output_dir, "wc_me.png"))
     
     print(f"\n👏个人微信2023年度报告\n")
     print("📊这一年中我总共给{}个群聊和{}个联系人发了{}条消息，共计{}个字。".format(
@@ -39,19 +41,19 @@ if __name__ == "__main__":
         group_cnt.index[0], group_cnt.values[0]))
     print("👉我最喜欢和联系人【{}】聊天，向ta激情发出{}条信息，得到了{}条回复。\n".format(
         private_cnt.index[0], private_cnt.values[0], 
-        len(messages[(messages["NickName"] == private_cnt.index[0]) & (messages["Sender"] != MY_WECHAT_NAME)])))
+        len(messages[(messages["NickName"] == private_cnt.index[0]) & (messages["Sender"] != args.my_wechat_name)])))
 
     print("\n🔥我的年度热词Top5：")
     emojis = ["1️⃣", "2️⃣", "3️⃣", "4️⃣", "5️⃣"]
     for i in range(min(5, len(cnt))):
         print("{}【{}】共使用{}次".format(emojis[i], cnt[i][0], cnt[i][1]))
     
-    emojis = top_emoji(me)
+    emojis = tools.top_emoji(me)
     print("\n🤚我的年度表情包Top5:")
     for i in range(min(5, len(emojis))):
         print("{}".format(emojis[i][0]), end=" ")
     
-    plot_nmess_per_minute(me)
-    plot_nmess_per_month(me)
+    tools.plot_nmess_per_minute(me, os.path.join(args.output_dir, "nmess_per_minute.png"))
+    tools.plot_nmess_per_month(me, os.path.join(args.output_dir, "nmess_per_month.png"))
     
     print("\n\n")

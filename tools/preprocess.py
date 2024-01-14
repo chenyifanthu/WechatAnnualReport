@@ -1,12 +1,18 @@
 import re
+import argparse
 import pandas as pd
 from .emojis import unify_emoji
+from omegaconf import OmegaConf
 
-MY_WECHAT_NAME = "my_wechat_name"    # 用来替代聊天记录文件中的【我】
 
+def load_config(args):
+    config = OmegaConf.load(args.config)
+    config = OmegaConf.merge(config, vars(args))
+    return config
+    
 
-def filter_group(df: pd.DataFrame, group_name: str):
-    # 查找某个特定名称群聊的聊天记录
+def filter_by_name(df: pd.DataFrame, group_name: str):
+    # 查找某个特定名称群聊/联系人的聊天记录
     res = df[df["NickName"].apply(lambda x: group_name in x)]
     fullname = res["NickName"].value_counts().index[0]
     filtered = res[res["NickName"] == fullname]
@@ -14,13 +20,11 @@ def filter_group(df: pd.DataFrame, group_name: str):
     return filtered, fullname
 
 
-def filter_friend(df: pd.DataFrame, friend_name: str):
-    # 查找某个特定名称联系人的聊天记录
-    res = df[df["NickName"].apply(lambda x: friend_name in x)]
-    fullname = res["NickName"].value_counts().index[0]
-    filtered = res[res["NickName"] == fullname]
-    filtered = filtered.reset_index()
-    return filtered, fullname
+# def name2remark(contacts: pd.DataFrame, name: str):
+#     if name == MY_WECHAT_NAME:
+#         return "我"
+#     res = contacts[contacts["NickName"] == name]["Remark"].values
+#     return res[0] if len(res) > 0 else name
 
 
 def parse_message(msg: str):
@@ -40,13 +44,10 @@ def parse_message(msg: str):
     return True
 
 
-def load_data(contacts_file: str = './data/contacts.csv', 
-              messages_file: str = './data/messages.csv',
-              start_date: str = "2023-01-01",
-              end_date: str = "2024-01-01"):
+def load_data(args):
     # 读取[start_date, end_date)时间段内的聊天记录(不包括end_date当天)
     global contacts, messages
-    contacts = pd.read_csv(contacts_file, index_col=False)
+    contacts = pd.read_csv(args.contacts_path, index_col=False)
     
     # 区分群聊和联系人
     isgroup = {}
@@ -54,15 +55,15 @@ def load_data(contacts_file: str = './data/contacts.csv',
         isgroup[row['NickName']] = 'chatroom' in row['UserName']
         
     # 将备注名转换为微信昵称
-    remark2nickname = {'我': MY_WECHAT_NAME}
+    remark2nickname = {'我': args.my_wechat_name}
     for i, row in contacts.iterrows():
         if not isgroup[row['NickName']] and row['Remark']:
             remark2nickname[row['Remark']] = row['NickName']
         
-    messages = pd.read_csv(messages_file, index_col=False)
+    messages = pd.read_csv(args.messages_path, index_col=False)
     messages.dropna(subset=["StrContent", "NickName", "StrTime"], inplace=True)
-    messages = messages[(messages["StrTime"] >= start_date) & \
-                        (messages["StrTime"] < end_date) & \
+    messages = messages[(messages["StrTime"] >= args.start_date) & \
+                        (messages["StrTime"] < args.end_date) & \
                         (messages["StrContent"].apply(parse_message))]
     messages = messages[~messages['NickName'].isin(['微信团队', '腾讯客服'])]
     
@@ -76,7 +77,3 @@ def load_data(contacts_file: str = './data/contacts.csv',
     return contacts, messages
 
 
-
-if __name__ == "__main__":
-    contacts, messages = load_info()
-    print(messages.head())

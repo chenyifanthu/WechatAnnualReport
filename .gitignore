@@ -2,3 +2,4 @@ __pycache__/
 *.csv
 *.png
 temp*
+output/
