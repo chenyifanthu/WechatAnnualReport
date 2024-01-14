@@ -173,7 +173,7 @@ def group_chat_annual_report(groupname):
     latest = get_latest_time(group)
     cnt = plot_wordcloud(group)
     print(len(cnt[0][0]), cnt[0][0])
-    print(f"👏群聊【{fullname}】2023年度报告\n")
+    print(f"\n👏群聊【{fullname}】2023年度报告\n")
     print("📊这一年中，我们在群里一共发出了{}条消息，{}个字".format(n_mess, n_char))
     print("  其中最晚的一条消息是【{}】在【{}】发出的，内容是【{}】".format(
         latest["Sender"], latest["StrTime"], latest["StrContent"]))
@@ -208,9 +208,7 @@ def name2remark(name: str):
 
 def private_chat_annual_report(name):
     global messages
-    global STOPWORDS
     friend, fullname = filter_friend(messages, name)
-    STOPWORDS.add(name2remark(fullname))
     n_mess, n_char = calculate_words(friend)
     latest = get_latest_time(friend)
     cnt = plot_wordcloud(friend)
@@ -220,7 +218,7 @@ def private_chat_annual_report(name):
     ta = friend[friend['Sender'] == fullname]
     ta = ta.reset_index(drop=True)
     cnt_ta = plot_wordcloud(ta, "wordcloud_ta.png")
-    print(f"👏你和【{fullname}】2023年度报告\n")
+    print(f"\n👏你和【{fullname}】2023年度报告\n")
     print("📊这一年中，你们一共发出了{}条消息，{}个字".format(n_mess, n_char))
     print("  其中最晚的一条消息是【{}】在【{}】发出的，内容是【{}】".format(
         name2remark(latest["Sender"]), latest["StrTime"], latest["StrContent"]))

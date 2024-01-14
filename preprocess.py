@@ -50,6 +50,7 @@ def load_info(contacts_file: str = 'contacts.csv',
     messages.reset_index(inplace=True)
     
     messages["StrContent"] = messages["StrContent"].apply(unify_emoji)
+    messages = messages[messages["Type"] == 1]
     
     return contacts, messages
 
