@@ -1,10 +1,30 @@
 import re
 import pandas as pd
-from emojis import unify_emoji
+from .emojis import unify_emoji
 
 MY_WECHAT_NAME = "my_wechat_name"    # 用来替代聊天记录文件中的【我】
 
+
+def filter_group(df: pd.DataFrame, group_name: str):
+    # 查找某个特定名称群聊的聊天记录
+    res = df[df["NickName"].apply(lambda x: group_name in x)]
+    fullname = res["NickName"].value_counts().index[0]
+    filtered = res[res["NickName"] == fullname]
+    filtered = filtered.reset_index()
+    return filtered, fullname
+
+
+def filter_friend(df: pd.DataFrame, friend_name: str):
+    # 查找某个特定名称联系人的聊天记录
+    res = df[df["NickName"].apply(lambda x: friend_name in x)]
+    fullname = res["NickName"].value_counts().index[0]
+    filtered = res[res["NickName"] == fullname]
+    filtered = filtered.reset_index()
+    return filtered, fullname
+
+
 def parse_message(msg: str):
+    # 过滤掉部份无用的消息: 表情包、语音、图片、视频、位置、名片、系统消息
     emoji_pattern = re.compile("<emoji .*?>")
     voice_pattern = re.compile("<voicemsg .*?/>")
     image_pattern = re.compile("<img .*?/>")
@@ -20,10 +40,11 @@ def parse_message(msg: str):
     return True
 
 
-def load_info(contacts_file: str = 'contacts.csv', 
-              messages_file: str = 'messages.csv',
+def load_data(contacts_file: str = './data/contacts.csv', 
+              messages_file: str = './data/messages.csv',
               start_date: str = "2023-01-01",
               end_date: str = "2024-01-01"):
+    # 读取[start_date, end_date)时间段内的聊天记录(不包括end_date当天)
     global contacts, messages
     contacts = pd.read_csv(contacts_file, index_col=False)
     

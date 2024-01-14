@@ -1,0 +1,23 @@
+# 从WechatMsg导出的csv文件路径
+contacts_path: ./data/contacts.csv
+messages_path: ./data/messages.csv
+
+# 数据统计的时间段：[start_date, end_date) 内的聊天记录
+start_date: "2023-01-01"
+end_date: "2024-01-01"
+
+# 屏蔽的关键词，不会出现在词云或者top words中
+stopwords_path: ./data/stopwords.txt
+
+# 词云的字体文件
+font_path: ./data/simhei.ttf
+
+# 输出图片的保存位置
+results_save_dir: ./output
+
+# 个人微信名称，用于替代数据文件中的“我”
+my_wechat_name: ABC
+
+# 一天当中最晚的时刻，该时刻之后的消息将被归入第二天
+# float类型，例如：5.0表示凌晨5点，4.5表示凌晨4点半
+latest_time: 5.0

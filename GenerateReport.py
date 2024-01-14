@@ -1,6 +1,6 @@
 import re
 import time
-import jieba 
+import tools 
 
 import pandas as pd
 import matplotlib.pyplot as plt
@@ -8,127 +8,19 @@ import matplotlib.pyplot as plt
 from tqdm import tqdm
 from collections import Counter
 from wordcloud import WordCloud, STOPWORDS
-from preprocess import load_info, MY_WECHAT_NAME
-from emojis import EMOJIS, EMOJI_PATTERN
 
 
 
-def filter_group(df: pd.DataFrame, group_name: str):
-    res = df[df["NickName"].apply(lambda x: group_name in x)]
-    fullname = res["NickName"].value_counts().index[0]
-    filtered = res[res["NickName"] == fullname]
-    filtered = filtered.reset_index()
-    return filtered, fullname
 
-def filter_friend(df: pd.DataFrame, friend_name: str):
-    res = df[df["NickName"].apply(lambda x: friend_name in x)]
-    fullname = res["NickName"].value_counts().index[0]
-    filtered = res[res["NickName"] == fullname]
-    filtered = filtered.reset_index()
-    return filtered, fullname
-
-
-def calculate_words(df: pd.DataFrame):
-    n_mess = len(df)
-    n_char = sum(df['StrContent'].apply(len))
-    return n_mess, n_char
-    
-    
-def get_latest_time(df: pd.DataFrame, latest_hour: float = 5):
-    def score(x):
-        hour, min, sec = time.localtime(x)[3:6]
-        if hour < latest_hour:
-            hour += 24
-        return hour * 3600 + min * 60 + sec
-
-    late_score = df['CreateTime'].apply(score)
-    latest = df.iloc[late_score.idxmax()]
-    return latest
-
-
-def plot_nmess_per_minute(df: pd.DataFrame):
-    hours = df.CreateTime.apply(lambda x: int(time.strftime("%H", time.localtime(x))))
-    minutes = df.CreateTime.apply(lambda x: int(time.strftime("%M", time.localtime(x))))
-    df["time"] = hours * 60 + minutes
-        
-    plt.figure(figsize=(12, 4))
-    df["time"].plot.hist(bins=1440, alpha=0.5)
-    plt.title("Distribution of messages per minute")
-    plt.xticks(range(0, 1440, 60), [str(i) for i in range(24)])
-    plt.savefig("nmess_per_minute.png")
-    
-    
-def plot_nmess_per_month(df: pd.DataFrame):
-    months = df.CreateTime.apply(lambda x: int(time.strftime("%m", time.localtime(x))))
-    plt.figure(figsize=(12, 4))
-    months.value_counts().sort_index().plot.bar()
-    plt.title("Distribution of messages per month")
-    plt.savefig("nmess_per_month.png")
-
-
-def plot_wordcloud(df, output_file: str = "wordcloud.png"):
-    global STOPWORDS
-    my_stopwords = open("stopwords.txt", "r", encoding="utf-8").read().split("\n")
-    STOPWORDS |= set(my_stopwords + ["\r\n"])
-    
-    all_words = []
-    for i, row in tqdm(df.iterrows(), total=len(df)):
-        row_content = row["StrContent"]
-        for emoji in EMOJIS:
-            row_content = row_content.replace(emoji, " ")
-        words = jieba.lcut(row_content)
-        for word in words:
-            if len(word) > 1 and word not in STOPWORDS:
-                all_words.append(word)
-                
-    cnt = sorted(Counter(all_words).items(), key=lambda x: x[1], reverse=True)
-    text = " ".join(all_words)
-    wc = WordCloud(font_path="simhei.ttf", background_color="white", max_words=2000,
-                   stopwords=STOPWORDS, max_font_size=200, min_font_size=6,
-                   width=1080, height=720, random_state=42,
-                   repeat=False, collocations=False, )
-    wc.generate(text)
-    plt.figure(figsize=(12, 12))
-    plt.imshow(wc, interpolation="bilinear")
-    plt.axis("off")
-    plt.savefig(output_file)
-    return cnt
-    
-    
-def most_active_person_in_group(df: pd.DataFrame, topk: int = 3):
-    vc = df["Sender"].value_counts()
-    name, n_mess = vc.index, vc.values
-    results = []
-    for i in range(topk):
-        n_char = sum(df[df["Sender"] == name[i]]["StrContent"].apply(len))
-        results.append((name[i], n_mess[i], n_char))
-    return results
-
-
-def most_active_day(df):
-    ymd = df['CreateTime'].apply(lambda x: time.strftime("%Y-%m-%d", time.localtime(x)))
-    days = ymd.value_counts()
-    return days.value_counts().sort_index().idxmax()
-
-
-def top_emoji(df: pd.DataFrame):
-    cnt = {}
-    for i, row in df.iterrows():
-        res_all = EMOJI_PATTERN.findall(row["StrContent"])
-        for res in res_all:
-            if len(res) < 10:
-                cnt[res] = cnt.get(res, 0) + 1
-    cnt = sorted(cnt.items(), key=lambda x: x[1], reverse=True)
-    return cnt
 
 
 def personal_annual_report():
     global messages
     me = messages[messages['Sender'] == MY_WECHAT_NAME]
     me = me.reset_index()
-    n_mess, n_char = calculate_words(me)
-    latest = get_latest_time(me)
-    cnt = plot_wordcloud(me)
+    n_mess, n_char = tools.calculate_words(me)
+    latest = tools.get_latest_time(me)
+    cnt = tools.plot_wordcloud(me)
     
     print(f"\n👏个人微信2023年度报告\n")
     print("📊这一年中我总共给{}个群聊和{}个联系人发了{}条消息，共计{}个字。".format(
