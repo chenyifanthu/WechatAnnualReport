@@ -49,11 +49,12 @@ def get_latest_time(df: pd.DataFrame, latest_hour: float = 5):
 def plot_nmess_per_minute(df: pd.DataFrame):
     hours = df.CreateTime.apply(lambda x: int(time.strftime("%H", time.localtime(x))))
     minutes = df.CreateTime.apply(lambda x: int(time.strftime("%M", time.localtime(x))))
-    df["time"] = hours + minutes / 60
+    df["time"] = hours * 60 + minutes
+        
     plt.figure(figsize=(12, 4))
     df["time"].plot.hist(bins=1440, alpha=0.5)
     plt.title("Distribution of messages per minute")
-    plt.xticks(range(0, 25, 1))
+    plt.xticks(range(0, 1440, 60), [str(i) for i in range(24)])
     plt.savefig("nmess_per_minute.png")
     
     
