@@ -1,20 +1,27 @@
 # WechatAnnualReport
 微信年度报告生成器！
+
 ## step 1: 导出聊天记录
 - 参考[WeChatMsg仓库](https://github.com/LC044/WeChatMsg)的步骤，推荐从他们的[Release](https://github.com/LC044/WeChatMsg/releases)中直接下载exe文件。
-- 导出联系人信息文件`contacts.csv`和聊天记录文件`messages.csv`，放置于本目录下。
+- 导出联系人信息文件`contacts.csv`和聊天记录文件`messages.csv`，放置于`./data`目录下。
 - 注意这一步仅能在Windows环境导出，Mac暂不支持。
 
-## step 2: Install Dependencies
+## step 2: 安装一些相关的库
 ```bash
-pip install tqdm pandas jieba wordcloud matplotlib
+pip install omegaconf tqdm pandas jieba wordcloud matplotlib
 ```
 
-## step 3: 运行分析脚本
+## step 3: 修改配置文件
+- 修改`./data/config.yaml`，主要就是my_wechat_name（个人微信昵称）一项
+- 可根据需要或者step 4的输出结果自行更改`./data/stopwords.txt`文件，存放屏蔽的关键词，不会出现在词云或者top words中
+
+
+## step 4: 运行分析脚本
+### 生成个人发出的所有消息的聊天报告
 ```
-python GenerateReport.py
+python personal_report.py
 ```
-- `personal_annual_report()`生成个人发出的所有聊天信息报告，输出在控制台，同时保存`nmess_per_minute.png`文件（逐分钟发出消息数量）和 `nmess_per_month.png`文件（各月份发出消息数量）。
+- 生成个人发出的所有聊天信息报告，输出在控制台，同时保存`nmess_per_minute.png`文件（逐分钟发出消息数量）和 `nmess_per_month.png`文件（各月份发出消息数量）在`output`文件夹。
 - 一个示例输出：
 
 ```
@@ -39,7 +46,11 @@ python GenerateReport.py
 [呲牙] [流泪] [强] [旺柴] [合十]
 ```
 
-- `group_chat_annual_report("群聊名称")`生成某群聊的聊天信息报告，输出在控制台，同时保存**该群聊的**`nmess_per_minute.png`文件（逐分钟发出消息数量）和 `nmess_per_month.png`文件（各月份发出消息数量）。
+### 生成群聊的聊天报告
+```
+python personal_report.py -n 群聊名称
+```
+- 生成某群聊的聊天信息报告，输出在控制台，同时保存**该群聊的**`nmess_per_minute.png`文件（逐分钟发出消息数量）和 `nmess_per_month.png`文件（各月份发出消息数量）在`output`文件夹。
 - 该函数的输入为群聊名称，如果有难输入的字符或emoji可以不输入全称只输一部分
 - 一个示例输出：
 
@@ -65,6 +76,48 @@ python GenerateReport.py
 [微笑] [流泪] [旺柴] [破涕为笑] [呲牙]
 ```
 
+### 生成与联系人的聊天报告
+```
+python personal_report.py -n 联系人昵称
+```
+- 生成和某个人的聊天信息报告，输出在控制台，同时保存**该私聊的**`nmess_per_minute.png`文件（逐分钟发出消息数量）和 `nmess_per_month.png`文件（各月份发出消息数量）。
+- **该函数的输入为联系人昵称（非备注）**，如果有难输入的字符或emoji可以不输入全称只输一部分
+- 一个示例输出：
+```
+👏你和【xxxx】2023年度报告
 
-- `private_chat_annual_report("联系人名称")`生成和某个人的聊天信息报告，输出在控制台。
-- 该功能还没实现，去跨年旅游懒得写了，欢迎大佬提交PR👏
+📊这一年中，你们一共发出了1535条消息，10941个字
+  其中最晚的一条消息是【xxxx】在【2023-12-10 04:59:38】发出的，内容是【xxxx】
+
+🔥你们的年度热词Top5：
+1️⃣【xxx】共出现了53次
+2️⃣【xxx】共出现了35次
+3️⃣【xxx】共出现了20次
+4️⃣【xxx】共出现了19次
+5️⃣【xxx】共出现了18次
+
+🤚你们的年度表情包Top5:
+[微笑] 😀 [旺柴] [破涕为笑] [呲牙]
+
+🔥我的年度热词Top5：
+1️⃣【xxx】共使用47次
+2️⃣【xxx】共使用26次
+3️⃣【xxx】共使用11次
+4️⃣【xxx】共使用11次
+5️⃣【xxx】共使用11次
+
+🤚我的年度表情包Top5:
+😀 [流泪] [旺柴] [破涕为笑] [呲牙]
+
+🔥TA的年度热词Top5：
+1️⃣【xxx】共使用11次
+2️⃣【xxx】共使用10次
+3️⃣【xxx】共使用10次
+4️⃣【xxx】共使用9次
+5️⃣【xxx】共使用9次
+
+🤚TA的年度表情包Top5:
+[微笑] [流泪] [旺柴] 😀 [呲牙]
+```
+
+- 当前版本仅对文字信息进行分析，拍一拍、进群邀请、红包、图片、gif表情包等信息暂时移除。之后会考虑加入拍一拍、红包、gif表情包的统计。
