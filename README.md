@@ -48,7 +48,7 @@ python personal_report.py
 
 ### 生成群聊的聊天报告
 ```
-python personal_report.py -n 群聊名称
+python group_report.py -n 群聊名称
 ```
 - 生成某群聊的聊天信息报告，输出在控制台，同时保存**该群聊的**`nmess_per_minute.png`文件（逐分钟发出消息数量）和 `nmess_per_month.png`文件（各月份发出消息数量）在`output`文件夹。
 - 该函数的输入为群聊名称，如果有难输入的字符或emoji可以不输入全称只输一部分
