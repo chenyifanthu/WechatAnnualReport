@@ -17,7 +17,7 @@ if __name__ == "__main__":
     args = parse_args()
     contacts, messages = tools.load_data(args)
     me = messages[messages['Sender'] == args.my_wechat_name]
-    me = me.reset_index()
+    me = me.reset_index(drop=True)
     n_mess, n_char = tools.calculate_words(me)
     latest = tools.get_latest_time(me, args.latest_hour)
     cnt = tools.plot_wordcloud(me, os.path.join(args.output_dir, "wc_me.png"))

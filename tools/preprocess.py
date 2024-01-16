@@ -16,7 +16,7 @@ def filter_by_name(df: pd.DataFrame, group_name: str):
     res = df[df["NickName"].apply(lambda x: group_name in x)]
     fullname = res["NickName"].value_counts().index[0]
     filtered = res[res["NickName"] == fullname]
-    filtered = filtered.reset_index()
+    filtered.reset_index(inplace=True, drop=True)
     return filtered, fullname
 
 
@@ -69,7 +69,7 @@ def load_data(args):
     
     messages["isGroup"] = messages["NickName"].apply(lambda x: isgroup[x])
     messages["Sender"] = messages["Sender"].apply(lambda x: remark2nickname.get(x, x))
-    messages.reset_index(inplace=True)
+    messages.reset_index(inplace=True, drop=True)
     
     messages["StrContent"] = messages["StrContent"].apply(unify_emoji)
     messages = messages[messages["Type"] == 1]
